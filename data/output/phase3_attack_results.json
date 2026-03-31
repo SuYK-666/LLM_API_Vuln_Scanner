@@ -1,0 +1,1084 @@
+[
+  {
+    "request_index": 1,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/payment/cards?uid=1001"
+    },
+    "payload_name": "uid-increment",
+    "payload": {
+      "name": "uid-increment",
+      "query": {
+        "uid": "1002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID increment to access another user's payment cards.",
+      "mitigation": "Validate that the authenticated user (from token) matches the 'uid' query parameter; implement ownership checks before returning data."
+    },
+    "response": {
+      "status_code": 403,
+      "length": 22,
+      "elapsed_ms": 18,
+      "preview": "{\"error\":\"Forbidden\"} ",
+      "body": "{\"error\":\"Forbidden\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 1,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/payment/cards?uid=1001"
+    },
+    "payload_name": "uid-decrement",
+    "payload": {
+      "name": "uid-decrement",
+      "query": {
+        "uid": "1000"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID decrement to access another user's payment cards.",
+      "mitigation": "Enforce strict ownership validation; log and alert on mismatches between token-subject and requested 'uid'."
+    },
+    "response": {
+      "status_code": 403,
+      "length": 22,
+      "elapsed_ms": 25,
+      "preview": "{\"error\":\"Forbidden\"} ",
+      "body": "{\"error\":\"Forbidden\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 1,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/payment/cards?uid=1001"
+    },
+    "payload_name": "uid-admin-id",
+    "payload": {
+      "name": "uid-admin-id",
+      "query": {
+        "uid": "1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Vertical escalation attempt: target low numeric ID often associated with admin or system accounts.",
+      "mitigation": "Implement role-based access control (RBAC) and deny access to privileged user IDs unless the requester has admin role."
+    },
+    "response": {
+      "status_code": 403,
+      "length": 22,
+      "elapsed_ms": 26,
+      "preview": "{\"error\":\"Forbidden\"} ",
+      "body": "{\"error\":\"Forbidden\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 1,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/payment/cards?uid=1001"
+    },
+    "payload_name": "header-owner-uid-mismatch",
+    "payload": {
+      "name": "header-owner-uid-mismatch",
+      "query": {
+        "uid": "1002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {
+        "X-Owner-Uid": "1002"
+      },
+      "reason": "Bypass via matching header to altered query param; tests if server trusts header over token.",
+      "mitigation": "Do not use client-supplied headers for authorization decisions; rely solely on validated token claims."
+    },
+    "response": {
+      "status_code": 403,
+      "length": 22,
+      "elapsed_ms": 16,
+      "preview": "{\"error\":\"Forbidden\"} ",
+      "body": "{\"error\":\"Forbidden\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 1,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/payment/cards?uid=1001"
+    },
+    "payload_name": "uid-negative",
+    "payload": {
+      "name": "uid-negative",
+      "query": {
+        "uid": "-1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Boundary test: negative ID may trigger errors or unintended data exposure.",
+      "mitigation": "Validate 'uid' parameter format (positive integer, UUID) and reject invalid values with 400 Bad Request."
+    },
+    "response": {
+      "status_code": 403,
+      "length": 22,
+      "elapsed_ms": 14,
+      "preview": "{\"error\":\"Forbidden\"} ",
+      "body": "{\"error\":\"Forbidden\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 2,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/order/detail?order_id=50001"
+    },
+    "payload_name": "order-id-increment",
+    "payload": {
+      "name": "order-id-increment",
+      "query": {
+        "order_id": "50002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation via sequential ID enumeration.",
+      "mitigation": "Implement ownership validation: verify the order belongs to the authenticated user (from token) before returning data."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 100,
+      "elapsed_ms": 34,
+      "preview": "{\"code\":0,\"data\":{\"amount\":499.0,\"order_id\":\"50002\",\"phone\":\"13900139002\",\"uid\":\"1002\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"amount\":499.0,\"order_id\":\"50002\",\"phone\":\"13900139002\",\"uid\":\"1002\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 2,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/order/detail?order_id=50001"
+    },
+    "payload_name": "order-id-decrement",
+    "payload": {
+      "name": "order-id-decrement",
+      "query": {
+        "order_id": "50000"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation via sequential ID enumeration (reverse).",
+      "mitigation": "Use unpredictable, non-sequential IDs (e.g., UUIDs) and enforce strict access control checks."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 28,
+      "elapsed_ms": 13,
+      "preview": "{\"error\":\"order not found\"} ",
+      "body": "{\"error\":\"order not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 2,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/order/detail?order_id=50001"
+    },
+    "payload_name": "user-id-injection-query",
+    "payload": {
+      "name": "user-id-injection-query",
+      "query": {
+        "order_id": "50001",
+        "user_id": "1002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Attempt to override or specify a different user identifier in query parameters.",
+      "mitigation": "Ignore any user/owner parameters from the request; derive identity solely from the validated session/token."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 100,
+      "elapsed_ms": 15,
+      "preview": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 2,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/order/detail?order_id=50001"
+    },
+    "payload_name": "role-escalation-header",
+    "payload": {
+      "name": "role-escalation-header",
+      "query": {},
+      "json_body": {},
+      "form_body": {},
+      "headers": {
+        "X-User-Role": "admin"
+      },
+      "reason": "Vertical escalation attempt by injecting admin role via custom header.",
+      "mitigation": "Do not trust client-submitted role headers; assign roles server-side based on authenticated session."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 100,
+      "elapsed_ms": 19,
+      "preview": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 2,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/order/detail?order_id=50001"
+    },
+    "payload_name": "tenant-boundary-bypass",
+    "payload": {
+      "name": "tenant-boundary-bypass",
+      "query": {
+        "order_id": "50001",
+        "tenant_id": "other_tenant"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Attempt to access order across tenant/organization boundaries.",
+      "mitigation": "Enforce tenant isolation (ABAC) by validating the resource's tenant matches the user's session tenant."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 100,
+      "elapsed_ms": 15,
+      "preview": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 3,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/profile?uid=1001"
+    },
+    "payload_name": "uid-increment",
+    "payload": {
+      "name": "uid-increment",
+      "query": {
+        "uid": "1002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID increment to access another user's profile.",
+      "mitigation": "Implement ownership validation: verify the authenticated user (from token) matches the requested uid; use UUIDs instead of sequential IDs."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 176,
+      "elapsed_ms": 3,
+      "preview": "{\"code\":0,\"data\":{\"address\":\"Beijing Haidian District\",\"email\":\"lisi@example.com\",\"id_card\":\"110101199202023456\",\"name\":\"Li Si\",\"phone\":\"13900139002\",\"uid\":\"1002\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"address\":\"Beijing Haidian District\",\"email\":\"lisi@example.com\",\"id_card\":\"110101199202023456\",\"name\":\"Li Si\",\"phone\":\"13900139002\",\"uid\":\"1002\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 3,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/profile?uid=1001"
+    },
+    "payload_name": "uid-decrement",
+    "payload": {
+      "name": "uid-decrement",
+      "query": {
+        "uid": "1000"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID decrement to access another user's profile.",
+      "mitigation": "Enforce ABAC: check if the user has permission to access the target uid's data; log and alert on mismatched uid requests."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 27,
+      "elapsed_ms": 13,
+      "preview": "{\"error\":\"user not found\"} ",
+      "body": "{\"error\":\"user not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 3,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/profile?uid=1001"
+    },
+    "payload_name": "uid-admin",
+    "payload": {
+      "name": "uid-admin",
+      "query": {
+        "uid": "1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Vertical escalation: target low numeric ID often assigned to admin users.",
+      "mitigation": "Apply RBAC: restrict profile access to self or authorized roles; deny-by-default for privileged accounts."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 27,
+      "elapsed_ms": 2,
+      "preview": "{\"error\":\"user not found\"} ",
+      "body": "{\"error\":\"user not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 3,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/profile?uid=1001"
+    },
+    "payload_name": "uid-negative",
+    "payload": {
+      "name": "uid-negative",
+      "query": {
+        "uid": "-1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Boundary testing: negative ID may trigger errors or unintended access.",
+      "mitigation": "Validate input: ensure uid is a positive integer; reject malformed or out-of-range values."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 27,
+      "elapsed_ms": 13,
+      "preview": "{\"error\":\"user not found\"} ",
+      "body": "{\"error\":\"user not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 3,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/profile?uid=1001"
+    },
+    "payload_name": "uid-string-injection",
+    "payload": {
+      "name": "uid-string-injection",
+      "query": {
+        "uid": "1001' OR '1'='1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "SQL injection attempt via uid parameter to bypass access control.",
+      "mitigation": "Use parameterized queries; validate uid as integer; implement WAF rules for SQLi patterns."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 27,
+      "elapsed_ms": 15,
+      "preview": "{\"error\":\"user not found\"} ",
+      "body": "{\"error\":\"user not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 4,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/settings?uid=1001"
+    },
+    "payload_name": "uid-increment",
+    "payload": {
+      "name": "uid-increment",
+      "query": {
+        "uid": "1002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID increment to access another user's settings.",
+      "mitigation": "Validate ownership: ensure the authenticated user (from token) matches the requested uid parameter. Implement deny-by-default for mismatched requests."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 164,
+      "elapsed_ms": 14,
+      "preview": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856700_330\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856700_330\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 4,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/settings?uid=1001"
+    },
+    "payload_name": "uid-decrement",
+    "payload": {
+      "name": "uid-decrement",
+      "query": {
+        "uid": "1000"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID decrement to access another user's settings.",
+      "mitigation": "Enforce strict ownership validation at the API layer. Use UUIDs instead of sequential IDs to reduce predictability."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 164,
+      "elapsed_ms": 21,
+      "preview": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856719_436\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856719_436\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 4,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/settings?uid=1001"
+    },
+    "payload_name": "uid-admin-id",
+    "payload": {
+      "name": "uid-admin-id",
+      "query": {
+        "uid": "1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Vertical escalation attempt: target low numeric ID often reserved for admin or system accounts.",
+      "mitigation": "Implement role-based access control (RBAC) and deny access to privileged accounts unless the requester has explicit admin role."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 164,
+      "elapsed_ms": 12,
+      "preview": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856734_793\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856734_793\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 4,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/settings?uid=1001"
+    },
+    "payload_name": "uid-current-user-token-mismatch",
+    "payload": {
+      "name": "uid-current-user-token-mismatch",
+      "query": {
+        "uid": "1001"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {
+        "Authorization": "Bearer another_user_token"
+      },
+      "reason": "Test token substitution: use a different user's token to access the same uid, checking if token validation is properly enforced.",
+      "mitigation": "Validate the JWT or token subject matches the uid parameter. Reject requests where token identity does not correspond to the requested resource owner."
+    },
+    "response": {
+      "status_code": 401,
+      "length": 25,
+      "elapsed_ms": 18,
+      "preview": "{\"error\":\"unauthorized\"} ",
+      "body": "{\"error\":\"unauthorized\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 4,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/settings?uid=1001"
+    },
+    "payload_name": "uid-parameter-removal",
+    "payload": {
+      "name": "uid-parameter-removal",
+      "query": {},
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Test default behavior: remove uid parameter to see if endpoint defaults to current user or exposes other data.",
+      "mitigation": "Require explicit uid parameter for user-specific endpoints. If omitted, return 400 Bad Request, do not default to the authenticated user's data."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 164,
+      "elapsed_ms": 19,
+      "preview": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856772_951\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856772_951\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 5,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/admin/audit"
+    },
+    "payload_name": "admin-role-header",
+    "payload": {
+      "name": "admin-role-header",
+      "query": {},
+      "json_body": {},
+      "form_body": {},
+      "headers": {
+        "Authorization": "Bearer admin_token"
+      },
+      "reason": "Replace user token with admin token for vertical escalation",
+      "mitigation": "Implement strict RBAC with token validation and deny-by-default for admin endpoints; log and alert on privilege escalation attempts."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 140,
+      "elapsed_ms": 15,
+      "preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 5,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/admin/audit"
+    },
+    "payload_name": "tenant-id-header",
+    "payload": {
+      "name": "tenant-id-header",
+      "query": {},
+      "json_body": {},
+      "form_body": {},
+      "headers": {
+        "X-Tenant-ID": "1"
+      },
+      "reason": "Add tenant ID header to attempt cross-tenant access",
+      "mitigation": "Enforce tenant isolation via ABAC; validate user's tenant membership from token/session; reject unauthorized tenant IDs."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 140,
+      "elapsed_ms": 14,
+      "preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 5,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/admin/audit"
+    },
+    "payload_name": "user-id-query",
+    "payload": {
+      "name": "user-id-query",
+      "query": {
+        "user_id": "admin"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Add user_id query param to filter as admin user",
+      "mitigation": "Validate ownership: user_id must match authenticated user or be authorized via RBAC; audit all query parameter usage."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 140,
+      "elapsed_ms": 18,
+      "preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 5,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/admin/audit"
+    },
+    "payload_name": "role-query",
+    "payload": {
+      "name": "role-query",
+      "query": {
+        "role": "superadmin"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Add role query param to attempt higher privilege filter",
+      "mitigation": "Server-side role validation: ignore client-supplied role parameters; derive role from authenticated session only."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 140,
+      "elapsed_ms": 2,
+      "preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 5,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/admin/audit"
+    },
+    "payload_name": "org-id-header",
+    "payload": {
+      "name": "org-id-header",
+      "query": {},
+      "json_body": {},
+      "form_body": {},
+      "headers": {
+        "X-Organization-ID": "0"
+      },
+      "reason": "Add organization ID header to test boundary crossover",
+      "mitigation": "Implement organization-level access control; map user to org via backend; reject unassociated org IDs."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 140,
+      "elapsed_ms": 12,
+      "preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 6,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/system/announcements?id=1"
+    },
+    "payload_name": "increment-id",
+    "payload": {
+      "name": "increment-id",
+      "query": {
+        "id": "2"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation via numeric ID increment to access other announcements.",
+      "mitigation": "Implement ownership validation: ensure the authenticated user has explicit read permission for the requested announcement ID via server-side checks."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 48,
+      "elapsed_ms": 15,
+      "preview": "public-announcement:2:Feature release:noise=4285",
+      "body": "public-announcement:2:Feature release:noise=4285"
+    },
+    "error": null
+  },
+  {
+    "request_index": 6,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/system/announcements?id=1"
+    },
+    "payload_name": "negative-id",
+    "payload": {
+      "name": "negative-id",
+      "query": {
+        "id": "-1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Test for IDOR via negative or out-of-range ID values.",
+      "mitigation": "Validate ID input: enforce positive integer range, reject malformed or out-of-scope IDs, and log failed authorization attempts."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 51,
+      "elapsed_ms": 19,
+      "preview": "public-announcement:1:System maintenance:noise=3058",
+      "body": "public-announcement:1:System maintenance:noise=3058"
+    },
+    "error": null
+  },
+  {
+    "request_index": 6,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/system/announcements?id=1"
+    },
+    "payload_name": "admin-id-bypass",
+    "payload": {
+      "name": "admin-id-bypass",
+      "query": {
+        "id": "0"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Attempt to access system-level announcement (ID 0) reserved for admin.",
+      "mitigation": "Apply ABAC: check user role and announcement visibility scope; restrict admin-only announcements with deny-by-default policy."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 51,
+      "elapsed_ms": 14,
+      "preview": "public-announcement:1:System maintenance:noise=8047",
+      "body": "public-announcement:1:System maintenance:noise=8047"
+    },
+    "error": null
+  },
+  {
+    "request_index": 6,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/system/announcements?id=1"
+    },
+    "payload_name": "uuid-injection",
+    "payload": {
+      "name": "uuid-injection",
+      "query": {
+        "id": "00000000-0000-0000-0000-000000000000"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Replace numeric ID with UUID format to test parser weaknesses or access different object types.",
+      "mitigation": "Use strongly typed IDs (e.g., UUID v4) and validate format/type before processing; map IDs to user context securely."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 51,
+      "elapsed_ms": 15,
+      "preview": "public-announcement:1:System maintenance:noise=1085",
+      "body": "public-announcement:1:System maintenance:noise=1085"
+    },
+    "error": null
+  },
+  {
+    "request_index": 6,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/system/announcements?id=1"
+    },
+    "payload_name": "tenant-crossover",
+    "payload": {
+      "name": "tenant-crossover",
+      "query": {
+        "id": "1001"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Attempt to access announcement from different tenant by jumping to high ID range.",
+      "mitigation": "Enforce tenant isolation: include tenant_id in query constraints and validate it matches the user's session tenant."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 51,
+      "elapsed_ms": 16,
+      "preview": "public-announcement:1:System maintenance:noise=1918",
+      "body": "public-announcement:1:System maintenance:noise=1918"
+    },
+    "error": null
+  },
+  {
+    "request_index": 7,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/avatar?uid=1001"
+    },
+    "payload_name": "uid-increment",
+    "payload": {
+      "name": "uid-increment",
+      "query": {
+        "uid": "1002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID increment to access another user's avatar.",
+      "mitigation": "Validate ownership: ensure uid matches authenticated user's ID from token; implement deny-by-default for cross-user data access."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 169,
+      "elapsed_ms": 17,
+      "preview": "{\"code\":0,\"data\":{\"avatar\":\"https://cdn.example.local/avatar/1002.png\",\"nick_name\":\"lisi_runner\",\"signature\":\"Keep it simple.\",\"theme\":\"sport\",\"uid\":\"1002\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"avatar\":\"https://cdn.example.local/avatar/1002.png\",\"nick_name\":\"lisi_runner\",\"signature\":\"Keep it simple.\",\"theme\":\"sport\",\"uid\":\"1002\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 7,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/avatar?uid=1001"
+    },
+    "payload_name": "uid-decrement",
+    "payload": {
+      "name": "uid-decrement",
+      "query": {
+        "uid": "1000"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Horizontal escalation: numeric ID decrement to access another user's avatar.",
+      "mitigation": "Enforce ABAC: check if requested uid belongs to the same tenant/org as the authenticated user; log and alert on mismatches."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 27,
+      "elapsed_ms": 17,
+      "preview": "{\"error\":\"user not found\"} ",
+      "body": "{\"error\":\"user not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 7,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/avatar?uid=1001"
+    },
+    "payload_name": "uid-admin-id",
+    "payload": {
+      "name": "uid-admin-id",
+      "query": {
+        "uid": "1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Vertical escalation: attempt to access admin user's avatar via low numeric ID.",
+      "mitigation": "Implement RBAC: restrict access to admin resources; use UUIDs instead of sequential IDs to reduce predictability."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 27,
+      "elapsed_ms": 2,
+      "preview": "{\"error\":\"user not found\"} ",
+      "body": "{\"error\":\"user not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 7,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/avatar?uid=1001"
+    },
+    "payload_name": "uid-parameter-removal",
+    "payload": {
+      "name": "uid-parameter-removal",
+      "query": {},
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Boundary bypass: remove uid parameter to see default/self behavior.",
+      "mitigation": "Require explicit ownership parameter; reject requests missing uid with 400 Bad Request; default to authenticated user's ID only after validation."
+    },
+    "response": {
+      "status_code": 200,
+      "length": 162,
+      "elapsed_ms": 13,
+      "preview": "{\"code\":0,\"data\":{\"avatar_url\":\"https://cdn.example.local/avatar/1001.png\",\"bio\":\"I love secure coding and coffee.\",\"nickname\":\"zs_dev\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"avatar_url\":\"https://cdn.example.local/avatar/1001.png\",\"bio\":\"I love secure coding and coffee.\",\"nickname\":\"zs_dev\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 7,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/avatar?uid=1001"
+    },
+    "payload_name": "uid-negative",
+    "payload": {
+      "name": "uid-negative",
+      "query": {
+        "uid": "-1"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Boundary testing: negative ID to probe error handling or access unintended data.",
+      "mitigation": "Validate input: ensure uid is positive integer or valid UUID; reject malformed values; implement strict type checking."
+    },
+    "response": {
+      "status_code": 404,
+      "length": 27,
+      "elapsed_ms": 14,
+      "preview": "{\"error\":\"user not found\"} ",
+      "body": "{\"error\":\"user not found\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 8,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001"
+    },
+    "payload_name": "numeric-id-increment",
+    "payload": {
+      "name": "numeric-id-increment",
+      "query": {
+        "file_id": "f-1002"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Increment numeric part of file_id to access another user's file.",
+      "mitigation": "Validate ownership via session token; use random UUIDs instead of sequential IDs; log and alert on access attempts to non-owned resources."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 35,
+      "elapsed_ms": 19,
+      "preview": "partial-content:f-1002:nonce=279799",
+      "body": "partial-content:f-1002:nonce=279799"
+    },
+    "error": null
+  },
+  {
+    "request_index": 8,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001"
+    },
+    "payload_name": "user-id-swap-in-query",
+    "payload": {
+      "name": "user-id-swap-in-query",
+      "query": {
+        "file_id": "f-2001"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Replace file_id with another user's file identifier to test horizontal privilege escalation.",
+      "mitigation": "Implement strict access control checks (ABAC) verifying the authenticated user's ownership of the requested file_id; enforce deny-by-default policy."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 35,
+      "elapsed_ms": 19,
+      "preview": "partial-content:f-2001:nonce=319131",
+      "body": "partial-content:f-2001:nonce=319131"
+    },
+    "error": null
+  },
+  {
+    "request_index": 8,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001"
+    },
+    "payload_name": "admin-file-access",
+    "payload": {
+      "name": "admin-file-access",
+      "query": {
+        "file_id": "admin-001"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Attempt to access admin-level file by using a privileged file_id pattern.",
+      "mitigation": "Role-based access control (RBAC) for file categories; separate admin file storage with distinct authorization middleware; audit all admin file accesses."
+    },
+    "response": {
+      "status_code": 500,
+      "length": 181,
+      "elapsed_ms": 13,
+      "preview": "{\"detail\":\"invalid literal for int() with base 10: 'admin-001'\",\"error\":\"internal server error\",\"trace\":\"FileService.download -> parse_file_id -> resolver.map\",\"type\":\"ValueError\"} ",
+      "body": "{\"detail\":\"invalid literal for int() with base 10: 'admin-001'\",\"error\":\"internal server error\",\"trace\":\"FileService.download -> parse_file_id -> resolver.map\",\"type\":\"ValueError\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 8,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001"
+    },
+    "payload_name": "tenant-boundary-cross",
+    "payload": {
+      "name": "tenant-boundary-cross",
+      "query": {
+        "file_id": "tenantB-f-1001"
+      },
+      "json_body": {},
+      "form_body": {},
+      "headers": {},
+      "reason": "Modify file_id to include another tenant identifier to test multi-tenant isolation bypass.",
+      "mitigation": "Enforce tenant isolation via middleware extracting tenant from token and validating it matches the resource's tenant; use tenant-scoped queries."
+    },
+    "response": {
+      "status_code": 500,
+      "length": 186,
+      "elapsed_ms": 17,
+      "preview": "{\"detail\":\"invalid literal for int() with base 10: 'tenantB-f-1001'\",\"error\":\"internal server error\",\"trace\":\"FileService.download -> parse_file_id -> resolver.map\",\"type\":\"ValueError\"} ",
+      "body": "{\"detail\":\"invalid literal for int() with base 10: 'tenantB-f-1001'\",\"error\":\"internal server error\",\"trace\":\"FileService.download -> parse_file_id -> resolver.map\",\"type\":\"ValueError\"}\n"
+    },
+    "error": null
+  },
+  {
+    "request_index": 8,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001"
+    },
+    "payload_name": "role-escalation-via-header",
+    "payload": {
+      "name": "role-escalation-via-header",
+      "query": {},
+      "json_body": {},
+      "form_body": {},
+      "headers": {
+        "Authorization": "Bearer admin_token"
+      },
+      "reason": "Replace user token with admin token to attempt vertical privilege escalation.",
+      "mitigation": "Validate token integrity and role claims server-side; implement least privilege; log and alert on role elevation attempts from non-admin IPs or unusual patterns."
+    },
+    "response": {
+      "status_code": 206,
+      "length": 35,
+      "elapsed_ms": 16,
+      "preview": "partial-content:f-1001:nonce=557597",
+      "body": "partial-content:f-1001:nonce=557597"
+    },
+    "error": null
+  }
+]

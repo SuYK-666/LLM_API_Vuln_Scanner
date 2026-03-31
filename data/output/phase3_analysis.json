@@ -1,0 +1,534 @@
+{
+  "total_endpoints_tested": 8,
+  "total_findings": 8,
+  "overall_risk": "High",
+  "risk_counts": {
+    "high": 3,
+    "medium": 2,
+    "low": 1,
+    "info": 2
+  },
+  "findings": [
+    {
+      "request_index": 2,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/order/detail?order_id=50001"
+      },
+      "risk_score": 100,
+      "risk_level": "High",
+      "evidence": {
+        "payload_name": "order-id-increment",
+        "payload": {
+          "name": "order-id-increment",
+          "query": {
+            "order_id": "50002"
+          },
+          "json_body": {},
+          "form_body": {},
+          "headers": {},
+          "reason": "Horizontal escalation via sequential ID enumeration.",
+          "mitigation": "Implement ownership validation: verify the order belongs to the authenticated user (from token) before returning data."
+        },
+        "baseline_status": 200,
+        "attack_status": 200,
+        "baseline_length": 100,
+        "attack_length": 100,
+        "similarity": 0.94,
+        "schema_overlap": {
+          "available": true,
+          "baseline_keys": 7,
+          "attack_keys": 7,
+          "shared_keys": 7,
+          "overlap_ratio": 1.0
+        },
+        "sensitive_hits": {
+          "phone": 1
+        },
+        "reasons": [
+          "Baseline and attack both returned 200.",
+          "High body similarity detected (0.94).",
+          "JSON key structure is highly consistent between baseline and attack (shared=7/7, overlap=1.00).",
+          "Sensitive data patterns matched: {'phone': 1}."
+        ],
+        "baseline_preview": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+        "attack_preview": "{\"code\":0,\"data\":{\"amount\":499.0,\"order_id\":\"50002\",\"phone\":\"13900139002\",\"uid\":\"1002\"},\"msg\":\"ok\"} "
+      },
+      "trigger_condition": "使用了名为 order-id-increment 的攻击载荷，测试理由：Horizontal escalation via sequential ID enumeration.；具体覆写参数：query={'order_id': '50002'}",
+      "impact_analysis": "攻击者可通过枚举参数，未授权获取系统内其他用户的 phone 等高价值敏感隐私数据，可能导致大规模数据泄露。",
+      "conclusion": "综合判定风险等级为：High。漏洞利用成功，存在明显的越权行为。",
+      "sensitive_summary": "检测到越权请求成功返回200，并从中正则匹配到了未授权的手机号记录；敏感字段类型：phone；命中统计：phone=1。",
+      "mitigation": {
+        "summary": "Horizontal privilege escalation via sequential order ID enumeration allows unauthorized access to other users' order details. The API endpoint lacks server-side ownership validation, returning sensitive data (phone numbers) for orders belonging to different users.",
+        "immediate_fixes": [
+          "Add server-side ownership check: verify authenticated user ID matches order's user ID before returning data",
+          "Implement deny-by-default authorization: reject all requests unless explicit ownership/RBAC validation passes",
+          "Replace numeric order IDs with cryptographically random UUIDs to reduce enumerability",
+          "Add authorization middleware that validates user ownership for every /order/detail request"
+        ],
+        "engineering_hardening": [
+          "Implement centralized authorization service/middleware with RBAC/ABAC policies for all sensitive endpoints",
+          "Design API to accept resource identifiers via path parameters (e.g., /orders/{order_id}) with built-in ownership validation",
+          "Use signed tokens (JWT) with embedded user ID and enforce server-side session validation",
+          "Create reusable authorization utilities for common patterns (ownership checks, role checks, permission checks)",
+          "Implement resource-based access control where each resource stores owner ID and access policies"
+        ],
+        "detection_and_monitoring": [
+          "Add audit logging for all order access attempts including: user ID, requested order ID, ownership validation result",
+          "Implement real-time alerts for failed ownership checks or suspicious access patterns (rapid ID enumeration)",
+          "Create security unit tests that verify authorization failures when users attempt to access others' orders",
+          "Monitor API logs for horizontal escalation patterns: sequential ID access across different user accounts",
+          "Implement integration tests simulating authenticated users trying to access unauthorized resources"
+        ],
+        "source": "llm_mitigation_pass"
+      }
+    },
+    {
+      "request_index": 3,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/user/profile?uid=1001"
+      },
+      "risk_score": 100,
+      "risk_level": "High",
+      "evidence": {
+        "payload_name": "uid-increment",
+        "payload": {
+          "name": "uid-increment",
+          "query": {
+            "uid": "1002"
+          },
+          "json_body": {},
+          "form_body": {},
+          "headers": {},
+          "reason": "Horizontal escalation: numeric ID increment to access another user's profile.",
+          "mitigation": "Implement ownership validation: verify the authenticated user (from token) matches the requested uid; use UUIDs instead of sequential IDs."
+        },
+        "baseline_status": 200,
+        "attack_status": 200,
+        "baseline_length": 184,
+        "attack_length": 176,
+        "similarity": 0.8278,
+        "schema_overlap": {
+          "available": true,
+          "baseline_keys": 9,
+          "attack_keys": 9,
+          "shared_keys": 9,
+          "overlap_ratio": 1.0
+        },
+        "sensitive_hits": {
+          "phone": 1,
+          "email": 1,
+          "id_card": 1
+        },
+        "reasons": [
+          "Baseline and attack both returned 200.",
+          "Moderate body similarity detected (0.83).",
+          "JSON key structure is highly consistent between baseline and attack (shared=9/9, overlap=1.00).",
+          "Sensitive data patterns matched: {'phone': 1, 'email': 1, 'id_card': 1}."
+        ],
+        "baseline_preview": "{\"code\":0,\"data\":{\"address\":\"Shanghai Pudong District\",\"email\":\"zhangsan@example.com\",\"id_card\":\"110101199001011234\",\"name\":\"Zhang San\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+        "attack_preview": "{\"code\":0,\"data\":{\"address\":\"Beijing Haidian District\",\"email\":\"lisi@example.com\",\"id_card\":\"110101199202023456\",\"name\":\"Li Si\",\"phone\":\"13900139002\",\"uid\":\"1002\"},\"msg\":\"ok\"} "
+      },
+      "trigger_condition": "使用了名为 uid-increment 的攻击载荷，测试理由：Horizontal escalation: numeric ID increment to access another user's profile.；具体覆写参数：query={'uid': '1002'}",
+      "impact_analysis": "攻击者可通过枚举参数，未授权获取系统内其他用户的 phone、email、id_card 等高价值敏感隐私数据，可能导致大规模数据泄露。",
+      "conclusion": "综合判定风险等级为：High。漏洞利用成功，存在明显的越权行为。",
+      "sensitive_summary": "检测到越权请求成功返回200，并从中正则匹配到了未授权的手机号记录；敏感字段类型：phone、email、id_card；命中统计：phone=1, email=1, id_card=1。",
+      "mitigation": {
+        "summary": "Horizontal privilege escalation via predictable numeric user ID parameter allows unauthorized access to other users' sensitive profile data (phone, email, ID card).",
+        "immediate_fixes": [
+          "Add server-side ownership validation: verify authenticated user ID from JWT/session matches requested uid parameter before returning data.",
+          "Replace sequential numeric IDs with random UUIDs for user identifiers in API parameters.",
+          "Implement deny-by-default authorization: reject all requests unless explicit ownership or role-based permission is verified.",
+          "Add audit logging for all profile access attempts, flagging mismatches between authenticated user and requested uid."
+        ],
+        "engineering_hardening": [
+          "Implement centralized authorization middleware that validates resource ownership for every sensitive endpoint.",
+          "Adopt Role-Based Access Control (RBAC) or Attribute-Based Access Control (ABAC) with explicit permission definitions.",
+          "Use indirect reference maps: map session/user tokens to internal IDs instead of exposing direct object identifiers.",
+          "Design API to use path parameters like /api/v1/user/profile (auto-derived from auth token) instead of query parameters with mutable IDs.",
+          "Create security unit tests that verify authorization failures when users attempt to access resources they don't own."
+        ],
+        "detection_and_monitoring": [
+          "Implement real-time monitoring for IDOR patterns: alert on sequential ID access patterns or rapid uid parameter changes.",
+          "Log all sensitive data access with user context, requested resource ID, and authorization decision for audit trails.",
+          "Deploy anomaly detection to identify cross-account access attempts (e.g., user accessing multiple unrelated profiles).",
+          "Conduct regular automated security scans testing for broken access control using both authenticated and unauthenticated probes.",
+          "Establish security regression tests that verify fixed vulnerabilities remain patched across code changes."
+        ],
+        "source": "llm_mitigation_pass"
+      }
+    },
+    {
+      "request_index": 5,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/admin/audit"
+      },
+      "risk_score": 100,
+      "risk_level": "High",
+      "evidence": {
+        "payload_name": "admin-role-header",
+        "payload": {
+          "name": "admin-role-header",
+          "query": {},
+          "json_body": {},
+          "form_body": {},
+          "headers": {
+            "Authorization": "Bearer admin_token"
+          },
+          "reason": "Replace user token with admin token for vertical escalation",
+          "mitigation": "Implement strict RBAC with token validation and deny-by-default for admin endpoints; log and alert on privilege escalation attempts."
+        },
+        "baseline_status": 200,
+        "attack_status": 200,
+        "baseline_length": 140,
+        "attack_length": 140,
+        "similarity": 1.0,
+        "schema_overlap": {
+          "available": true,
+          "baseline_keys": 7,
+          "attack_keys": 7,
+          "shared_keys": 7,
+          "overlap_ratio": 1.0
+        },
+        "sensitive_hits": {
+          "phone": 1,
+          "email": 1
+        },
+        "reasons": [
+          "Baseline and attack both returned 200.",
+          "High body similarity detected (1.00).",
+          "JSON key structure is highly consistent between baseline and attack (shared=7/7, overlap=1.00).",
+          "Sensitive data patterns matched: {'phone': 1, 'email': 1}."
+        ],
+        "baseline_preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} ",
+        "attack_preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} "
+      },
+      "trigger_condition": "使用了名为 admin-role-header 的攻击载荷，测试理由：Replace user token with admin token for vertical escalation；具体覆写参数：headers={'Authorization': 'Bearer admin_token'}",
+      "impact_analysis": "攻击者可通过枚举参数，未授权获取系统内其他用户的 phone、email 等高价值敏感隐私数据，可能导致大规模数据泄露。",
+      "conclusion": "综合判定风险等级为：High。漏洞利用成功，存在明显的越权行为。",
+      "sensitive_summary": "检测到越权请求成功返回200，并从中正则匹配到了未授权的手机号记录；敏感字段类型：phone、email；命中统计：phone=1, email=1。",
+      "mitigation": {
+        "summary": "Vertical privilege escalation via admin token substitution on admin audit endpoint, allowing unauthorized access to sensitive audit data.",
+        "immediate_fixes": [
+          "Implement server-side authorization middleware that validates user role from verified JWT claims, not just token presence",
+          "Add explicit role-based access control (RBAC) check for admin endpoints before processing requests",
+          "Replace static admin token validation with dynamic role verification from authenticated user session",
+          "Apply deny-by-default policy to all admin endpoints requiring explicit admin role verification"
+        ],
+        "engineering_hardening": [
+          "Implement ABAC (Attribute-Based Access Control) with centralized authorization service for all sensitive endpoints",
+          "Use opaque, non-enumerable identifiers (UUIDs) for all resource references to prevent ID enumeration attacks",
+          "Add mandatory ownership checks for every resource access, even for admin roles with appropriate scoping",
+          "Create security unit tests validating authorization failures when non-admin tokens access admin endpoints",
+          "Implement comprehensive integration tests for RBAC/ABAC rules across all API endpoints"
+        ],
+        "detection_and_monitoring": [
+          "Enable detailed audit logging for all admin endpoint access attempts including user ID, role, and outcome",
+          "Implement real-time alerting for privilege escalation attempts and unauthorized admin access",
+          "Create anomaly detection for cross-account access patterns and unusual role usage",
+          "Establish regular security review of authorization logs for broken access control patterns",
+          "Monitor and alert on failed authorization attempts with subsequent successful access using different tokens"
+        ],
+        "source": "llm_mitigation_pass"
+      }
+    },
+    {
+      "request_index": 4,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/user/settings?uid=1001"
+      },
+      "risk_score": 70,
+      "risk_level": "Medium",
+      "evidence": {
+        "payload_name": "uid-increment",
+        "payload": {
+          "name": "uid-increment",
+          "query": {
+            "uid": "1002"
+          },
+          "json_body": {},
+          "form_body": {},
+          "headers": {},
+          "reason": "Horizontal escalation: numeric ID increment to access another user's settings.",
+          "mitigation": "Validate ownership: ensure the authenticated user (from token) matches the requested uid parameter. Implement deny-by-default for mismatched requests."
+        },
+        "baseline_status": 200,
+        "attack_status": 200,
+        "baseline_length": 164,
+        "attack_length": 164,
+        "similarity": 0.9512,
+        "schema_overlap": {
+          "available": true,
+          "baseline_keys": 10,
+          "attack_keys": 10,
+          "shared_keys": 9,
+          "overlap_ratio": 0.9
+        },
+        "sensitive_hits": {},
+        "reasons": [
+          "Baseline and attack both returned 200.",
+          "High body similarity detected (0.95).",
+          "JSON key structure is highly consistent between baseline and attack (shared=9/10, overlap=0.90).",
+          "Score capped at 70 because no sensitive data pattern was matched."
+        ],
+        "baseline_preview": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937729822_894\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+        "attack_preview": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937856700_330\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"} "
+      },
+      "trigger_condition": "使用了名为 uid-increment 的攻击载荷，测试理由：Horizontal escalation: numeric ID increment to access another user's settings.；具体覆写参数：query={'uid': '1002'}",
+      "impact_analysis": "攻击者可越权执行敏感操作或查看未授权页面。",
+      "conclusion": "综合判定风险等级为：Medium。漏洞利用成功，存在明显的越权行为。",
+      "sensitive_summary": "未匹配到手机号/邮箱/身份证等敏感模式。",
+      "mitigation": {
+        "summary": "Horizontal privilege escalation via predictable numeric user ID parameter allows unauthorized access to other users' settings. The endpoint returns sensitive user data without verifying the authenticated user owns the requested resource.",
+        "immediate_fixes": [
+          "Add server-side ownership validation: compare authenticated user ID from session/token with requested uid parameter before processing.",
+          "Implement deny-by-default authorization: reject all requests where authenticated user doesn't match resource owner unless explicitly allowed.",
+          "Replace numeric ID parameter with session-derived user identifier where possible to prevent parameter manipulation."
+        ],
+        "engineering_hardening": [
+          "Implement centralized authorization middleware that validates resource ownership for all sensitive endpoints.",
+          "Use opaque identifiers (UUIDs) instead of sequential numeric IDs to reduce predictability of IDOR attacks.",
+          "Enforce Role-Based Access Control (RBAC) or Attribute-Based Access Control (ABAC) for all API endpoints.",
+          "Add security unit/integration tests that verify authorization failures when users attempt to access others' resources.",
+          "Implement parameter binding validation that rejects requests where user attempts to specify another user's identifier."
+        ],
+        "detection_and_monitoring": [
+          "Add audit logging for all user settings access attempts, including requested UID and authenticated UID.",
+          "Implement real-time alerting for cross-account access attempts (where requested UID ≠ authenticated UID).",
+          "Create security monitoring dashboards tracking authorization failure rates and suspicious parameter patterns.",
+          "Regularly review access logs for horizontal privilege escalation patterns using automated analysis.",
+          "Implement canary tokens or honeypot user accounts to detect enumeration and unauthorized access attempts."
+        ],
+        "source": "llm_mitigation_pass"
+      }
+    },
+    {
+      "request_index": 7,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/user/avatar?uid=1001"
+      },
+      "risk_score": 70,
+      "risk_level": "Medium",
+      "evidence": {
+        "payload_name": "uid-parameter-removal",
+        "payload": {
+          "name": "uid-parameter-removal",
+          "query": {},
+          "json_body": {},
+          "form_body": {},
+          "headers": {},
+          "reason": "Boundary bypass: remove uid parameter to see default/self behavior.",
+          "mitigation": "Require explicit ownership parameter; reject requests missing uid with 400 Bad Request; default to authenticated user's ID only after validation."
+        },
+        "baseline_status": 200,
+        "attack_status": 200,
+        "baseline_length": 162,
+        "attack_length": 162,
+        "similarity": 1.0,
+        "schema_overlap": {
+          "available": true,
+          "baseline_keys": 7,
+          "attack_keys": 7,
+          "shared_keys": 7,
+          "overlap_ratio": 1.0
+        },
+        "sensitive_hits": {},
+        "reasons": [
+          "Baseline and attack both returned 200.",
+          "High body similarity detected (1.00).",
+          "JSON key structure is highly consistent between baseline and attack (shared=7/7, overlap=1.00).",
+          "Score capped at 70 because no sensitive data pattern was matched."
+        ],
+        "baseline_preview": "{\"code\":0,\"data\":{\"avatar_url\":\"https://cdn.example.local/avatar/1001.png\",\"bio\":\"I love secure coding and coffee.\",\"nickname\":\"zs_dev\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+        "attack_preview": "{\"code\":0,\"data\":{\"avatar_url\":\"https://cdn.example.local/avatar/1001.png\",\"bio\":\"I love secure coding and coffee.\",\"nickname\":\"zs_dev\",\"uid\":\"1001\"},\"msg\":\"ok\"} "
+      },
+      "trigger_condition": "使用了名为 uid-parameter-removal 的攻击载荷，测试理由：Boundary bypass: remove uid parameter to see default/self behavior.；具体覆写参数：未观察到参数覆写",
+      "impact_analysis": "攻击者可越权执行敏感操作或查看未授权页面。",
+      "conclusion": "综合判定风险等级为：Medium。漏洞利用成功，存在明显的越权行为。",
+      "sensitive_summary": "未匹配到手机号/邮箱/身份证等敏感模式。",
+      "mitigation": {
+        "summary": "Endpoint returns another user's data when uid parameter is omitted, indicating missing server-side ownership validation and insecure default behavior.",
+        "immediate_fixes": [
+          "Require uid parameter for all requests; return 400 Bad Request if missing",
+          "Implement server-side check: compare requested uid with authenticated user's ID; return 403 if mismatch",
+          "Remove default behavior that falls back to authenticated user's data when uid is omitted",
+          "Add authorization middleware that validates user ownership before processing request"
+        ],
+        "engineering_hardening": [
+          "Implement deny-by-default authorization policy for all user resource endpoints",
+          "Use UUIDs instead of sequential numeric IDs to reduce enumeration risks",
+          "Create centralized authorization service with RBAC/ABAC rules for user data access",
+          "Add security unit tests verifying 403 responses for cross-account access attempts",
+          "Implement parameter validation middleware that rejects requests with missing required parameters",
+          "Design API to use path parameters (/api/v1/user/{uid}/avatar) instead of query parameters for resource identifiers"
+        ],
+        "detection_and_monitoring": [
+          "Implement audit logging for all user data access attempts, including requested and authenticated user IDs",
+          "Create alerts for repeated 403 authorization failures from single source",
+          "Monitor for parameter manipulation attacks in access logs",
+          "Implement automated security tests that verify authorization controls for all user resource endpoints",
+          "Add anomaly detection for cross-account access patterns outside normal behavior"
+        ],
+        "source": "llm_mitigation_pass"
+      }
+    },
+    {
+      "request_index": 8,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001"
+      },
+      "risk_score": 10,
+      "risk_level": "Low",
+      "evidence": {
+        "payload_name": "admin-file-access",
+        "payload": {
+          "name": "admin-file-access",
+          "query": {
+            "file_id": "admin-001"
+          },
+          "json_body": {},
+          "form_body": {},
+          "headers": {},
+          "reason": "Attempt to access admin-level file by using a privileged file_id pattern.",
+          "mitigation": "Role-based access control (RBAC) for file categories; separate admin file storage with distinct authorization middleware; audit all admin file accesses."
+        },
+        "baseline_status": 206,
+        "attack_status": 500,
+        "baseline_length": 35,
+        "attack_length": 181,
+        "similarity": 0.0648,
+        "schema_overlap": {
+          "available": false,
+          "baseline_keys": 0,
+          "attack_keys": 0,
+          "shared_keys": 0,
+          "overlap_ratio": 0.0
+        },
+        "sensitive_hits": {},
+        "reasons": [
+          "Attack request triggered server error response."
+        ],
+        "baseline_preview": "partial-content:f-1001:nonce=476632",
+        "attack_preview": "{\"detail\":\"invalid literal for int() with base 10: 'admin-001'\",\"error\":\"internal server error\",\"trace\":\"FileService.download -> parse_file_id -> resolver.map\",\"type\":\"ValueError\"} "
+      },
+      "trigger_condition": "使用了名为 admin-file-access 的攻击载荷，测试理由：Attempt to access admin-level file by using a privileged file_id pattern.；具体覆写参数：query={'file_id': 'admin-001'}",
+      "impact_analysis": "当前存在较弱越权信号，建议结合业务语义进一步复测确认。",
+      "conclusion": "综合判定风险等级为：Low。发现可疑越权信号，建议尽快修复并复测。",
+      "sensitive_summary": "未匹配到手机号/邮箱/身份证等敏感模式。",
+      "mitigation": {
+        "summary": "Role-based access control (RBAC) for file categories; separate admin file storage with distinct authorization middleware; audit all admin file accesses.",
+        "immediate_fixes": [],
+        "engineering_hardening": [],
+        "detection_and_monitoring": [],
+        "source": "payload_hint"
+      }
+    },
+    {
+      "request_index": 1,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/payment/cards?uid=1001"
+      },
+      "risk_score": 0,
+      "risk_level": "Info",
+      "evidence": {
+        "payload_name": "uid-increment",
+        "payload": {
+          "name": "uid-increment",
+          "query": {
+            "uid": "1002"
+          },
+          "json_body": {},
+          "form_body": {},
+          "headers": {},
+          "reason": "Horizontal escalation: numeric ID increment to access another user's payment cards.",
+          "mitigation": "Validate that the authenticated user (from token) matches the 'uid' query parameter; implement ownership checks before returning data."
+        },
+        "baseline_status": 202,
+        "attack_status": 403,
+        "baseline_length": 47,
+        "attack_length": 22,
+        "similarity": 0.1739,
+        "schema_overlap": {
+          "available": false,
+          "baseline_keys": 0,
+          "attack_keys": 0,
+          "shared_keys": 0,
+          "overlap_ratio": 0.0
+        },
+        "sensitive_hits": {},
+        "reasons": [
+          "Attack request was blocked by authorization (401/403)."
+        ],
+        "baseline_preview": "accepted:masked-card-view:uid=1001:nonce=233037",
+        "attack_preview": "{\"error\":\"Forbidden\"} "
+      },
+      "trigger_condition": "使用了名为 uid-increment 的攻击载荷，测试理由：Horizontal escalation: numeric ID increment to access another user's payment cards.；具体覆写参数：query={'uid': '1002'}",
+      "impact_analysis": "当前存在较弱越权信号，建议结合业务语义进一步复测确认。",
+      "conclusion": "综合判定风险等级为：Info。当前未发现明确越权成功证据。",
+      "sensitive_summary": "未匹配到手机号/邮箱/身份证等敏感模式。",
+      "mitigation": {
+        "summary": "Validate that the authenticated user (from token) matches the 'uid' query parameter; implement ownership checks before returning data.",
+        "immediate_fixes": [],
+        "engineering_hardening": [],
+        "detection_and_monitoring": [],
+        "source": "payload_hint"
+      }
+    },
+    {
+      "request_index": 6,
+      "endpoint": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8000/api/v1/system/announcements?id=1"
+      },
+      "risk_score": 0,
+      "risk_level": "Info",
+      "evidence": {
+        "payload_name": "increment-id",
+        "payload": {
+          "name": "increment-id",
+          "query": {
+            "id": "2"
+          },
+          "json_body": {},
+          "form_body": {},
+          "headers": {},
+          "reason": "Horizontal escalation via numeric ID increment to access other announcements.",
+          "mitigation": "Implement ownership validation: ensure the authenticated user has explicit read permission for the requested announcement ID via server-side checks."
+        },
+        "baseline_status": 206,
+        "attack_status": 206,
+        "baseline_length": 51,
+        "attack_length": 48,
+        "similarity": 0.6061,
+        "schema_overlap": {
+          "available": false,
+          "baseline_keys": 0,
+          "attack_keys": 0,
+          "shared_keys": 0,
+          "overlap_ratio": 0.0
+        },
+        "sensitive_hits": {},
+        "reasons": [],
+        "baseline_preview": "public-announcement:1:System maintenance:noise=3969",
+        "attack_preview": "public-announcement:2:Feature release:noise=4285"
+      },
+      "trigger_condition": "使用了名为 increment-id 的攻击载荷，测试理由：Horizontal escalation via numeric ID increment to access other announcements.；具体覆写参数：query={'id': '2'}",
+      "impact_analysis": "当前存在较弱越权信号，建议结合业务语义进一步复测确认。",
+      "conclusion": "综合判定风险等级为：Info。当前未发现明确越权成功证据。",
+      "sensitive_summary": "未匹配到手机号/邮箱/身份证等敏感模式。",
+      "mitigation": {
+        "summary": "Implement ownership validation: ensure the authenticated user has explicit read permission for the requested announcement ID via server-side checks.",
+        "immediate_fixes": [],
+        "engineering_hardening": [],
+        "detection_and_monitoring": [],
+        "source": "payload_hint"
+      }
+    }
+  ]
+}

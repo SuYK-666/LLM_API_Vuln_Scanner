@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLM API Broken Access Control Report</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --high: #b91c1c;
+        --med: #b45309;
+        --low: #1d4ed8;
+        --ok: #065f46;
+        --border: #dbe3ee;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(120deg, #f4f7fb 0%, #e8eff9 100%);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      }
+      h1, h2, h3 {
+        margin-top: 0;
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 10px;
+      }
+      .metric {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .value {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: #fff;
+      }
+      .badge.High { background: var(--high); }
+      .badge.Medium { background: var(--med); }
+      .badge.Low { background: var(--low); }
+      .badge.Info { background: var(--ok); }
+      .muted {
+        color: var(--muted);
+      }
+      .section {
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--border);
+      }
+      .section h3 {
+        margin-bottom: 8px;
+      }
+      .kv {
+        margin: 4px 0;
+      }
+      .alert {
+        border-left: 4px solid #dc2626;
+        background: #fef2f2;
+        padding: 10px;
+        border-radius: 6px;
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        background: #fee2e2;
+        color: #991b1b;
+        margin-right: 6px;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 10px;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      ul {
+        margin: 6px 0 0 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>LLM API Broken Access Control Report</h1>
+        <p class="muted">LLM API Broken Access Control Report</p>
+        <div class="summary">
+          <div class="metric">
+            <div class="label">Endpoints Tested</div>
+            <div class="value">8</div>
+          </div>
+          <div class="metric">
+            <div class="label">Findings</div>
+            <div class="value">8</div>
+          </div>
+          <div class="metric">
+            <div class="label">Overall Risk</div>
+            <div class="value">High</div>
+          </div>
+          <div class="metric">
+            <div class="label">High/Medium/Low</div>
+            <div class="value">
+              3 / 2 / 1
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/order/detail?order_id=50001
+          <span class="badge High">High (100)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/order/detail?order_id=50001</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named order-id-increment, test rationale: Horizontal escalation via sequential ID enumeration.; specific override parameters: query={&#39;order_id&#39;: &#39;50002&#39;}</div>
+          <div class="kv"><strong>Trigger Payload:</strong> order-id-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>Similarity:</strong> 0.94</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=7 / baseline=7 / attack=7 / overlap=1.00
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              
+              <span class="pill">phone=1</span>
+              
+            
+          </div>
+          <div class="alert">Detected successful unauthorized request returning 200, and unauthorized phone number records were matched via regular expression; sensitive field type: phone; hit count: phone=1.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;amount&#34;:199.0,&#34;order_id&#34;:&#34;50001&#34;,&#34;phone&#34;:&#34;13800138001&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;amount&#34;:499.0,&#34;order_id&#34;:&#34;50002&#34;,&#34;phone&#34;:&#34;13900139002&#34;,&#34;uid&#34;:&#34;1002&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Attackers can enumerate parameters to obtain high-value sensitive private data such as phone numbers of other users within the system without authorization, potentially leading to large-scale data breaches.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk assessment level: High. Vulnerability exploitation successful, clear privilege escalation behavior exists.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Horizontal privilege escalation via sequential order ID enumeration allows unauthorized access to other users&#39; order details. The API endpoint lacks server-side ownership validation, returning sensitive data (phone numbers) for orders belonging to different users.</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+          <div>- Add server-side ownership check: verify authenticated user ID matches order&#39;s user ID before returning data</div>
+          
+          <div>- Implement deny-by-default authorization: reject all requests unless explicit ownership/RBAC validation passes</div>
+          
+          <div>- Replace numeric order IDs with cryptographically random UUIDs to reduce enumerability</div>
+          
+          <div>- Add authorization middleware that validates user ownership for every /order/detail request</div>
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement centralized authorization service/middleware with RBAC/ABAC policies for all sensitive endpoints</div>
+          
+          <div>- Design API to accept resource identifiers via path parameters (e.g., /orders/{order_id}) with built-in ownership validation</div>
+          
+          <div>- Use signed tokens (JWT) with embedded user ID and enforce server-side session validation</div>
+          
+          <div>- Create reusable authorization utilities for common patterns (ownership checks, role checks, permission checks)</div>
+          
+          <div>- Implement resource-based access control where each resource stores owner ID and access policies</div>
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+          <div>- Add audit logging for all order access attempts including: user ID, requested order ID, ownership validation result</div>
+          
+          <div>- Implement real-time alerts for failed ownership checks or suspicious access patterns (rapid ID enumeration)</div>
+          
+          <div>- Create security unit tests that verify authorization failures when users attempt to access others&#39; orders</div>
+          
+          <div>- Monitor API logs for horizontal escalation patterns: sequential ID access across different user accounts</div>
+          
+          <div>- Implement integration tests simulating authenticated users trying to access unauthorized resources</div>
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/user/profile?uid=1001
+          <span class="badge High">High (100)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/user/profile?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named uid-increment. Test rationale: Horizontal escalation: numeric ID increment to access another user&#39;s profile. Specific override parameter: query={&#39;uid&#39;: &#39;1002&#39;}</div>
+          <div class="kv"><strong>Trigger Payload:</strong> uid-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>Similarity:</strong> 0.8278</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=9 / baseline=9 / attack=9 / overlap=1.00
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              
+              <span class="pill">phone=1</span>
+              
+              <span class="pill">email=1</span>
+              
+              <span class="pill">id_card=1</span>
+              
+            
+          </div>
+          <div class="alert">Detected successful unauthorized request returning 200, and unauthorized phone number records were matched via regex; sensitive field types: phone, email, id_card; hit statistics: phone=1, email=1, id_card=1.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;address&#34;:&#34;Shanghai Pudong District&#34;,&#34;email&#34;:&#34;zhangsan@example.com&#34;,&#34;id_card&#34;:&#34;110101199001011234&#34;,&#34;name&#34;:&#34;Zhang San&#34;,&#34;phone&#34;:&#34;13800138001&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;address&#34;:&#34;Beijing Haidian District&#34;,&#34;email&#34;:&#34;lisi@example.com&#34;,&#34;id_card&#34;:&#34;110101199202023456&#34;,&#34;name&#34;:&#34;Li Si&#34;,&#34;phone&#34;:&#34;13900139002&#34;,&#34;uid&#34;:&#34;1002&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Attackers can enumerate parameters to obtain high-value sensitive private data of other users within the system, such as phone, email, and id_card, without authorization, potentially leading to large-scale data breaches.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk level assessment: High. Vulnerability exploitation successful, with clear evidence of privilege escalation.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Horizontal privilege escalation via predictable numeric user ID parameter allows unauthorized access to other users&#39; sensitive profile data (phone, email, ID card).</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+          <div>- Add server-side ownership validation: verify authenticated user ID from JWT/session matches requested uid parameter before returning data.</div>
+          
+          <div>- Replace sequential numeric IDs with random UUIDs for user identifiers in API parameters.</div>
+          
+          <div>- Implement deny-by-default authorization: reject all requests unless explicit ownership or role-based permission is verified.</div>
+          
+          <div>- Add audit logging for all profile access attempts, flagging mismatches between authenticated user and requested uid.</div>
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement centralized authorization middleware that validates resource ownership for every sensitive endpoint.</div>
+          
+          <div>- Adopt Role-Based Access Control (RBAC) or Attribute-Based Access Control (ABAC) with explicit permission definitions.</div>
+          
+          <div>- Use indirect reference maps: map session/user tokens to internal IDs instead of exposing direct object identifiers.</div>
+          
+          <div>- Design API to use path parameters like /api/v1/user/profile (auto-derived from auth token) instead of query parameters with mutable IDs.</div>
+          
+          <div>- Create security unit tests that verify authorization failures when users attempt to access resources they don&#39;t own.</div>
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement real-time monitoring for IDOR patterns: alert on sequential ID access patterns or rapid uid parameter changes.</div>
+          
+          <div>- Log all sensitive data access with user context, requested resource ID, and authorization decision for audit trails.</div>
+          
+          <div>- Deploy anomaly detection to identify cross-account access attempts (e.g., user accessing multiple unrelated profiles).</div>
+          
+          <div>- Conduct regular automated security scans testing for broken access control using both authenticated and unauthenticated probes.</div>
+          
+          <div>- Establish security regression tests that verify fixed vulnerabilities remain patched across code changes.</div>
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/admin/audit
+          <span class="badge High">High (100)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/admin/audit</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named admin-role-header, test rationale: Replace user token with admin token for vertical escalation; specific override parameters: headers={&#39;Authorization&#39;: &#39;Bearer admin_token&#39;}</div>
+          <div class="kv"><strong>Trigger Payload:</strong> admin-role-header</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>Similarity:</strong> 1.0</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=7 / baseline=7 / attack=7 / overlap=1.00
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              
+              <span class="pill">phone=1</span>
+              
+              <span class="pill">email=1</span>
+              
+            
+          </div>
+          <div class="alert">Detected successful unauthorized request returning 200, and unauthorized phone number records were matched via regex; sensitive field types: phone, email; hit statistics: phone=1, email=1.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;ops_email&#34;:&#34;ops_team@example.com&#34;,&#34;ops_phone&#34;:&#34;13600136000&#34;,&#34;service&#34;:&#34;payment&#34;,&#34;ticket_id&#34;:&#34;AUD-2026-0042&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;ops_email&#34;:&#34;ops_team@example.com&#34;,&#34;ops_phone&#34;:&#34;13600136000&#34;,&#34;service&#34;:&#34;payment&#34;,&#34;ticket_id&#34;:&#34;AUD-2026-0042&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Attackers can enumerate parameters to obtain high-value sensitive private data such as phone numbers and emails of other users within the system without authorization, potentially leading to large-scale data breaches.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk assessment level: High. Vulnerability exploitation successful, clear evidence of unauthorized access behavior.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Vertical privilege escalation via admin token substitution on admin audit endpoint, allowing unauthorized access to sensitive audit data.</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement server-side authorization middleware that validates user role from verified JWT claims, not just token presence</div>
+          
+          <div>- Add explicit role-based access control (RBAC) check for admin endpoints before processing requests</div>
+          
+          <div>- Replace static admin token validation with dynamic role verification from authenticated user session</div>
+          
+          <div>- Apply deny-by-default policy to all admin endpoints requiring explicit admin role verification</div>
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement ABAC (Attribute-Based Access Control) with centralized authorization service for all sensitive endpoints</div>
+          
+          <div>- Use opaque, non-enumerable identifiers (UUIDs) for all resource references to prevent ID enumeration attacks</div>
+          
+          <div>- Add mandatory ownership checks for every resource access, even for admin roles with appropriate scoping</div>
+          
+          <div>- Create security unit tests validating authorization failures when non-admin tokens access admin endpoints</div>
+          
+          <div>- Implement comprehensive integration tests for RBAC/ABAC rules across all API endpoints</div>
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+          <div>- Enable detailed audit logging for all admin endpoint access attempts including user ID, role, and outcome</div>
+          
+          <div>- Implement real-time alerting for privilege escalation attempts and unauthorized admin access</div>
+          
+          <div>- Create anomaly detection for cross-account access patterns and unusual role usage</div>
+          
+          <div>- Establish regular security review of authorization logs for broken access control patterns</div>
+          
+          <div>- Monitor and alert on failed authorization attempts with subsequent successful access using different tokens</div>
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/user/settings?uid=1001
+          <span class="badge Medium">Medium (70)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/user/settings?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named uid-increment. Test rationale: Horizontal escalation: numeric ID increment to access another user&#39;s settings. Specific override parameters: query={&#39;uid&#39;: &#39;1002&#39;}</div>
+          <div class="kv"><strong>Trigger Payload:</strong> uid-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>Similarity:</strong> 0.9512</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=9 / baseline=10 / attack=10 / overlap=0.90
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">No sensitive patterns such as phone numbers/email addresses/ID cards were matched.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;notification&#34;:{&#34;email&#34;:true,&#34;sms&#34;:false},&#34;theme&#34;:&#34;light&#34;,&#34;trace_1774937729822_894&#34;:&#34;request-bound&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;notification&#34;:{&#34;email&#34;:true,&#34;sms&#34;:false},&#34;theme&#34;:&#34;light&#34;,&#34;trace_1774937856700_330&#34;:&#34;request-bound&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Attackers can perform sensitive operations or view unauthorized pages beyond their privileges.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk assessment level: Medium. Vulnerability exploitation successful, clear evidence of privilege escalation behavior.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Horizontal privilege escalation via predictable numeric user ID parameter allows unauthorized access to other users&#39; settings. The endpoint returns sensitive user data without verifying the authenticated user owns the requested resource.</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+          <div>- Add server-side ownership validation: compare authenticated user ID from session/token with requested uid parameter before processing.</div>
+          
+          <div>- Implement deny-by-default authorization: reject all requests where authenticated user doesn&#39;t match resource owner unless explicitly allowed.</div>
+          
+          <div>- Replace numeric ID parameter with session-derived user identifier where possible to prevent parameter manipulation.</div>
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement centralized authorization middleware that validates resource ownership for all sensitive endpoints.</div>
+          
+          <div>- Use opaque identifiers (UUIDs) instead of sequential numeric IDs to reduce predictability of IDOR attacks.</div>
+          
+          <div>- Enforce Role-Based Access Control (RBAC) or Attribute-Based Access Control (ABAC) for all API endpoints.</div>
+          
+          <div>- Add security unit/integration tests that verify authorization failures when users attempt to access others&#39; resources.</div>
+          
+          <div>- Implement parameter binding validation that rejects requests where user attempts to specify another user&#39;s identifier.</div>
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+          <div>- Add audit logging for all user settings access attempts, including requested UID and authenticated UID.</div>
+          
+          <div>- Implement real-time alerting for cross-account access attempts (where requested UID ≠ authenticated UID).</div>
+          
+          <div>- Create security monitoring dashboards tracking authorization failure rates and suspicious parameter patterns.</div>
+          
+          <div>- Regularly review access logs for horizontal privilege escalation patterns using automated analysis.</div>
+          
+          <div>- Implement canary tokens or honeypot user accounts to detect enumeration and unauthorized access attempts.</div>
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/user/avatar?uid=1001
+          <span class="badge Medium">Medium (70)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/user/avatar?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named uid-parameter-removal. Test rationale: Boundary bypass: remove uid parameter to see default/self behavior. Specific parameter overrides: No parameter overrides were observed.</div>
+          <div class="kv"><strong>Trigger Payload:</strong> uid-parameter-removal</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>Similarity:</strong> 1.0</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=7 / baseline=7 / attack=7 / overlap=1.00
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">No sensitive patterns such as phone numbers/emails/ID cards were matched.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;avatar_url&#34;:&#34;https://cdn.example.local/avatar/1001.png&#34;,&#34;bio&#34;:&#34;I love secure coding and coffee.&#34;,&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;avatar_url&#34;:&#34;https://cdn.example.local/avatar/1001.png&#34;,&#34;bio&#34;:&#34;I love secure coding and coffee.&#34;,&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Attackers can perform sensitive operations or view unauthorized pages beyond their privileges.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk assessment level: Medium. Vulnerability exploitation successful, with evident privilege escalation behavior.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Endpoint returns another user&#39;s data when uid parameter is omitted, indicating missing server-side ownership validation and insecure default behavior.</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+          <div>- Require uid parameter for all requests; return 400 Bad Request if missing</div>
+          
+          <div>- Implement server-side check: compare requested uid with authenticated user&#39;s ID; return 403 if mismatch</div>
+          
+          <div>- Remove default behavior that falls back to authenticated user&#39;s data when uid is omitted</div>
+          
+          <div>- Add authorization middleware that validates user ownership before processing request</div>
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement deny-by-default authorization policy for all user resource endpoints</div>
+          
+          <div>- Use UUIDs instead of sequential numeric IDs to reduce enumeration risks</div>
+          
+          <div>- Create centralized authorization service with RBAC/ABAC rules for user data access</div>
+          
+          <div>- Add security unit tests verifying 403 responses for cross-account access attempts</div>
+          
+          <div>- Implement parameter validation middleware that rejects requests with missing required parameters</div>
+          
+          <div>- Design API to use path parameters (/api/v1/user/{uid}/avatar) instead of query parameters for resource identifiers</div>
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+          <div>- Implement audit logging for all user data access attempts, including requested and authenticated user IDs</div>
+          
+          <div>- Create alerts for repeated 403 authorization failures from single source</div>
+          
+          <div>- Monitor for parameter manipulation attacks in access logs</div>
+          
+          <div>- Implement automated security tests that verify authorization controls for all user resource endpoints</div>
+          
+          <div>- Add anomaly detection for cross-account access patterns outside normal behavior</div>
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001
+          <span class="badge Low">Low (10)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named admin-file-access, test reason: Attempt to access admin-level file by using a privileged file_id pattern.; specific override parameters: query={&#39;file_id&#39;: &#39;admin-001&#39;}</div>
+          <div class="kv"><strong>Trigger Payload:</strong> admin-file-access</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=206 / attack=500</div>
+          <div class="kv"><strong>Similarity:</strong> 0.0648</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=0 / baseline=0 / attack=0 / overlap=0.00
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">No sensitive patterns such as phone numbers/email addresses/ID cards were matched.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>partial-content:f-1001:nonce=476632</pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>{&#34;detail&#34;:&#34;invalid literal for int() with base 10: &#39;admin-001&#39;&#34;,&#34;error&#34;:&#34;internal server error&#34;,&#34;trace&#34;:&#34;FileService.download -&gt; parse_file_id -&gt; resolver.map&#34;,&#34;type&#34;:&#34;ValueError&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Currently, there is a weak signal of unauthorized access; it is recommended to conduct further retesting and confirmation in conjunction with business semantics.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk assessment level: Low. Suspicious unauthorized access signals have been detected; it is recommended to repair and retest as soon as possible.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Role-based access control (RBAC) for file categories; separate admin file storage with distinct authorization middleware; audit all admin file accesses.</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> payload_hint</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/payment/cards?uid=1001
+          <span class="badge Info">Info (0)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/payment/cards?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named uid-increment, test rationale: Horizontal escalation: numeric ID increment to access another user&#39;s payment cards.; specific override parameters: query={&#39;uid&#39;: &#39;1002&#39;}</div>
+          <div class="kv"><strong>Trigger Payload:</strong> uid-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=202 / attack=403</div>
+          <div class="kv"><strong>Similarity:</strong> 0.1739</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=0 / baseline=0 / attack=0 / overlap=0.00
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">No sensitive patterns such as phone numbers/email addresses/ID cards were matched.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>accepted:masked-card-view:uid=1001:nonce=233037</pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>{&#34;error&#34;:&#34;Forbidden&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Currently, there are weak privilege escalation signals; it is recommended to conduct further retesting and confirmation in conjunction with business semantics.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk level assessment: Info. No clear evidence of successful privilege escalation has been found at this time.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Validate that the authenticated user (from token) matches the &#39;uid&#39; query parameter; implement ownership checks before returning data.</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> payload_hint</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/system/announcements?id=1
+          <span class="badge Info">Info (0)</span>
+        </h2>
+
+        <div class="section">
+          <h3>Risk Object</h3>
+          <div class="kv"><strong>API:</strong> GET http://127.0.0.1:8000/api/v1/system/announcements?id=1</div>
+        </div>
+
+        <div class="section">
+          <h3>Trigger Condition</h3>
+          <div class="kv">Used an attack payload named increment-id, test rationale: Horizontal escalation via numeric ID increment to access other announcements.; specific override parameters: query={&#39;id&#39;: &#39;2&#39;}</div>
+          <div class="kv"><strong>Trigger Payload:</strong> increment-id</div>
+        </div>
+
+        <div class="section">
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Status Compare:</strong> baseline=206 / attack=206</div>
+          <div class="kv"><strong>Similarity:</strong> 0.6061</div>
+          <div class="kv"><strong>JSON Schema Overlap:</strong>
+            shared=0 / baseline=0 / attack=0 / overlap=0.00
+          </div>
+          <div class="kv"><strong>Sensitive Hits:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">No sensitive patterns such as phone numbers/email addresses/ID cards were matched.</div>
+          <h3>Risk Evidence (Key)</h3>
+          <div class="kv"><strong>Baseline Preview:</strong></div>
+          <pre>public-announcement:1:System maintenance:noise=3969</pre>
+          <div class="kv"><strong>Attack Preview:</strong></div>
+          <pre>public-announcement:2:Feature release:noise=4285</pre>
+        </div>
+
+        <div class="section">
+          <h3>Impact Analysis</h3>
+          <div class="kv">Currently, there is a weak signal of unauthorized access. It is recommended to conduct further retesting and confirmation in conjunction with business semantics.</div>
+        </div>
+
+        <div class="section">
+          <h3>Conclusion</h3>
+          <div class="kv"><strong>Comprehensive risk level assessment: Info. No clear evidence of successful unauthorized access has been found at present.</strong></div>
+        </div>
+
+        <h3>Mitigation &amp; Prevention</h3>
+        <div class="kv"><strong>Summary:</strong> Implement ownership validation: ensure the authenticated user has explicit read permission for the requested announcement ID via server-side checks.</div>
+        <div class="kv"><strong>Immediate Fixes:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>Engineering Hardening:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>Detection and Monitoring:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv muted"><strong>Suggestion Source:</strong> payload_hint</div>
+      </div>
+      
+      
+    </div>
+  </body>
+</html>

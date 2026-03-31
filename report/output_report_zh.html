@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLM API 越权漏洞分析报告</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --high: #b91c1c;
+        --med: #b45309;
+        --low: #1d4ed8;
+        --ok: #065f46;
+        --border: #dbe3ee;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(120deg, #f4f7fb 0%, #e8eff9 100%);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      }
+      h1, h2, h3 {
+        margin-top: 0;
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 10px;
+      }
+      .metric {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .value {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: #fff;
+      }
+      .badge.High { background: var(--high); }
+      .badge.Medium { background: var(--med); }
+      .badge.Low { background: var(--low); }
+      .badge.Info { background: var(--ok); }
+      .muted {
+        color: var(--muted);
+      }
+      .section {
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--border);
+      }
+      .section h3 {
+        margin-bottom: 8px;
+      }
+      .kv {
+        margin: 4px 0;
+      }
+      .alert {
+        border-left: 4px solid #dc2626;
+        background: #fef2f2;
+        padding: 10px;
+        border-radius: 6px;
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        background: #fee2e2;
+        color: #991b1b;
+        margin-right: 6px;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 10px;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      ul {
+        margin: 6px 0 0 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>LLM API Broken Access Control Report</h1>
+        <p class="muted">LLM API 越权漏洞分析报告</p>
+        <div class="summary">
+          <div class="metric">
+            <div class="label">测试接口数</div>
+            <div class="value">8</div>
+          </div>
+          <div class="metric">
+            <div class="label">发现风险数</div>
+            <div class="value">8</div>
+          </div>
+          <div class="metric">
+            <div class="label">总体风险</div>
+            <div class="value">High</div>
+          </div>
+          <div class="metric">
+            <div class="label">高/中/低</div>
+            <div class="value">
+              3 / 2 / 1
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/order/detail?order_id=50001
+          <span class="badge High">High (100)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/order/detail?order_id=50001</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 order-id-increment 的攻击载荷，测试理由：通过顺序ID枚举实现横向权限提升。；具体覆写参数：query={&#39;order_id&#39;: &#39;50002&#39;}</div>
+          <div class="kv"><strong>触发载荷:</strong> order-id-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>内容相似度:</strong> 0.94</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=7 / baseline=7 / attack=7 / overlap=1.00
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              
+              <span class="pill">phone=1</span>
+              
+            
+          </div>
+          <div class="alert">检测到越权请求成功返回200，并从中正则匹配到了未授权的手机号记录；敏感字段类型：phone；命中统计：phone=1。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;amount&#34;:199.0,&#34;order_id&#34;:&#34;50001&#34;,&#34;phone&#34;:&#34;13800138001&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;amount&#34;:499.0,&#34;order_id&#34;:&#34;50002&#34;,&#34;phone&#34;:&#34;13900139002&#34;,&#34;uid&#34;:&#34;1002&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">攻击者可通过枚举参数，未授权获取系统内其他用户的 phone 等高价值敏感隐私数据，可能导致大规模数据泄露。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：高。漏洞利用成功，存在明显的越权行为。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 通过顺序订单ID枚举实现的横向权限提升允许未授权访问其他用户的订单详情。该API端点缺乏服务器端所有权验证，返回了属于不同用户的订单的敏感数据（电话号码）。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+          <div>- 添加服务器端所有权检查：在返回数据前验证认证用户ID是否与订单的用户ID匹配</div>
+          
+          <div>- 实施默认拒绝的授权策略：除非明确的所有权/RBAC验证通过，否则拒绝所有请求</div>
+          
+          <div>- 将数字订单ID替换为加密随机UUID以减少可枚举性</div>
+          
+          <div>- 为每个/order/detail请求添加验证用户所有权的授权中间件</div>
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有敏感端点实施带有RBAC/ABAC策略的集中式授权服务/中间件</div>
+          
+          <div>- 设计API通过路径参数接受资源标识符（例如/orders/{order_id}）并内置所有权验证</div>
+          
+          <div>- 使用带有嵌入用户ID的签名令牌（JWT）并强制执行服务器端会话验证</div>
+          
+          <div>- 为常见模式创建可复用的授权工具（所有权检查、角色检查、权限检查）</div>
+          
+          <div>- 实施基于资源的访问控制，其中每个资源存储所有者ID和访问策略</div>
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有订单访问尝试添加审计日志记录，包括：用户ID、请求的订单ID、所有权验证结果</div>
+          
+          <div>- 实施实时告警机制，针对失败的所有权检查或可疑访问模式（快速ID枚举）</div>
+          
+          <div>- 创建安全单元测试，验证当用户尝试访问他人订单时的授权失败情况</div>
+          
+          <div>- 监控API日志中的横向权限提升模式：跨不同用户账户的顺序ID访问</div>
+          
+          <div>- 实施模拟认证用户尝试访问未授权资源的集成测试</div>
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/user/profile?uid=1001
+          <span class="badge High">High (100)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/user/profile?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 uid-increment 的攻击载荷，测试理由：水平权限提升：通过数字ID递增访问其他用户资料。；具体覆写参数：query={&#39;uid&#39;: &#39;1002&#39;}</div>
+          <div class="kv"><strong>触发载荷:</strong> uid-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>内容相似度:</strong> 0.8278</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=9 / baseline=9 / attack=9 / overlap=1.00
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              
+              <span class="pill">phone=1</span>
+              
+              <span class="pill">email=1</span>
+              
+              <span class="pill">id_card=1</span>
+              
+            
+          </div>
+          <div class="alert">检测到越权请求成功返回200，并从中正则匹配到了未授权的手机号记录；敏感字段类型：phone、email、id_card；命中统计：phone=1, email=1, id_card=1。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;address&#34;:&#34;Shanghai Pudong District&#34;,&#34;email&#34;:&#34;zhangsan@example.com&#34;,&#34;id_card&#34;:&#34;110101199001011234&#34;,&#34;name&#34;:&#34;Zhang San&#34;,&#34;phone&#34;:&#34;13800138001&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;address&#34;:&#34;Beijing Haidian District&#34;,&#34;email&#34;:&#34;lisi@example.com&#34;,&#34;id_card&#34;:&#34;110101199202023456&#34;,&#34;name&#34;:&#34;Li Si&#34;,&#34;phone&#34;:&#34;13900139002&#34;,&#34;uid&#34;:&#34;1002&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">攻击者可通过枚举参数，未授权获取系统内其他用户的 phone、email、id_card 等高价值敏感隐私数据，可能导致大规模数据泄露。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：高。漏洞利用成功，存在明显的越权行为。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 通过可预测的数字用户ID参数实现水平权限提升，允许未授权访问其他用户的敏感资料数据（phone、email、id_card）。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+          <div>- 添加服务器端所有权验证：在返回数据前，验证来自JWT/会话的已认证用户ID是否与请求的uid参数匹配。</div>
+          
+          <div>- 将API参数中的顺序数字用户标识符替换为随机UUID。</div>
+          
+          <div>- 实施默认拒绝的授权策略：除非明确验证了所有权或基于角色的权限，否则拒绝所有请求。</div>
+          
+          <div>- 为所有资料访问尝试添加审计日志记录，标记已认证用户与请求uid不匹配的情况。</div>
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+          <div>- 实施集中式授权中间件，为每个敏感端点验证资源所有权。</div>
+          
+          <div>- 采用基于角色的访问控制（RBAC）或基于属性的访问控制（ABAC），并明确定义权限。</div>
+          
+          <div>- 使用间接引用映射：将会话/用户令牌映射到内部ID，而不是暴露直接的对象标识符。</div>
+          
+          <div>- 设计API使用路径参数（如 /api/v1/user/profile，从认证令牌自动派生），而非使用带有可变ID的查询参数。</div>
+          
+          <div>- 创建安全单元测试，验证当用户尝试访问其不拥有的资源时授权失败。</div>
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+          <div>- 实施针对IDOR模式的实时监控：对顺序ID访问模式或快速的uid参数变化发出警报。</div>
+          
+          <div>- 记录所有敏感数据访问，包含用户上下文、请求的资源ID和授权决策，用于审计追踪。</div>
+          
+          <div>- 部署异常检测以识别跨账户访问尝试（例如，用户访问多个不相关的资料）。</div>
+          
+          <div>- 定期进行自动化安全扫描，使用已认证和未认证的探针测试访问控制缺陷。</div>
+          
+          <div>- 建立安全回归测试，确保已修复的漏洞在代码变更后保持修补状态。</div>
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/admin/audit
+          <span class="badge High">High (100)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/admin/audit</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 admin-role-header 的攻击载荷，测试目的：替换用户令牌为管理员令牌以实现垂直权限提升；具体覆写参数：headers={&#39;Authorization&#39;: &#39;Bearer admin_token&#39;}</div>
+          <div class="kv"><strong>触发载荷:</strong> admin-role-header</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>内容相似度:</strong> 1.0</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=7 / baseline=7 / attack=7 / overlap=1.00
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              
+              <span class="pill">phone=1</span>
+              
+              <span class="pill">email=1</span>
+              
+            
+          </div>
+          <div class="alert">检测到越权请求成功返回200，并从中正则匹配到了未授权的手机号记录；敏感字段类型：手机号、电子邮箱；命中统计：手机号=1, 电子邮箱=1。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;ops_email&#34;:&#34;ops_team@example.com&#34;,&#34;ops_phone&#34;:&#34;13600136000&#34;,&#34;service&#34;:&#34;payment&#34;,&#34;ticket_id&#34;:&#34;AUD-2026-0042&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;ops_email&#34;:&#34;ops_team@example.com&#34;,&#34;ops_phone&#34;:&#34;13600136000&#34;,&#34;service&#34;:&#34;payment&#34;,&#34;ticket_id&#34;:&#34;AUD-2026-0042&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">攻击者可通过枚举参数，未授权获取系统内其他用户的手机号、电子邮箱等高价值敏感隐私数据，可能导致大规模数据泄露。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：高。漏洞利用成功，存在明显的越权行为。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 通过管理员令牌替换在管理员审计端点上实现垂直权限提升，允许未授权访问敏感审计数据。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+          <div>- 实施服务器端授权中间件，从已验证的JWT声明中验证用户角色，而不仅仅是检查令牌是否存在</div>
+          
+          <div>- 在处理请求前，为所有管理员端点添加明确的基于角色的访问控制（RBAC）检查</div>
+          
+          <div>- 将静态的管理员令牌验证替换为从已认证用户会话中进行的动态角色验证</div>
+          
+          <div>- 对所有需要明确管理员角色验证的管理员端点应用默认拒绝策略</div>
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有敏感端点实施基于属性的访问控制（ABAC）并配备集中式授权服务</div>
+          
+          <div>- 对所有资源引用使用不透明、不可枚举的标识符（UUID），以防止ID枚举攻击</div>
+          
+          <div>- 为每次资源访问添加强制性的所有权检查，即使对于具有适当权限范围的管理员角色也应如此</div>
+          
+          <div>- 创建安全单元测试，验证当非管理员令牌访问管理员端点时授权失败的情况</div>
+          
+          <div>- 为所有API端点的RBAC/ABAC规则实施全面的集成测试</div>
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有管理员端点访问尝试启用详细审计日志记录，包括用户ID、角色和结果</div>
+          
+          <div>- 实施实时告警机制，针对权限提升尝试和未授权的管理员访问</div>
+          
+          <div>- 创建异常检测机制，用于识别跨账户访问模式和异常角色使用情况</div>
+          
+          <div>- 定期对授权日志进行安全审查，以发现访问控制失效的模式</div>
+          
+          <div>- 监控并告警在使用不同令牌后，授权失败尝试随后成功访问的情况</div>
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/user/settings?uid=1001
+          <span class="badge Medium">Medium (70)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/user/settings?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 uid-increment 的攻击载荷，测试理由：水平权限提升：通过递增数字ID访问其他用户的设置。；具体覆写参数：query={&#39;uid&#39;: &#39;1002&#39;}</div>
+          <div class="kv"><strong>触发载荷:</strong> uid-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>内容相似度:</strong> 0.9512</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=9 / baseline=10 / attack=10 / overlap=0.90
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">未匹配到手机号/邮箱/身份证等敏感模式。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;notification&#34;:{&#34;email&#34;:true,&#34;sms&#34;:false},&#34;theme&#34;:&#34;light&#34;,&#34;trace_1774937729822_894&#34;:&#34;request-bound&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;notification&#34;:{&#34;email&#34;:true,&#34;sms&#34;:false},&#34;theme&#34;:&#34;light&#34;,&#34;trace_1774937856700_330&#34;:&#34;request-bound&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">攻击者可越权执行敏感操作或查看未授权页面。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：中等。漏洞利用成功，存在明显的越权行为。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 通过可预测的数字用户ID参数实现水平权限提升，允许未授权访问其他用户的设置。该端点返回敏感用户数据时未验证请求资源是否属于已认证用户。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+          <div>- 添加服务器端所有权验证：在处理前，比较会话/令牌中的已认证用户ID与请求的uid参数。</div>
+          
+          <div>- 实施默认拒绝的授权策略：除非明确允许，否则拒绝所有已认证用户与资源所有者不匹配的请求。</div>
+          
+          <div>- 尽可能使用会话派生的用户标识符替代数字ID参数，以防止参数篡改。</div>
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有敏感端点实施集中式授权中间件，验证资源所有权。</div>
+          
+          <div>- 使用不透明标识符（UUID）替代顺序数字ID，以降低IDOR攻击的可预测性。</div>
+          
+          <div>- 为所有API端点强制执行基于角色的访问控制（RBAC）或基于属性的访问控制（ABAC）。</div>
+          
+          <div>- 添加安全单元/集成测试，验证用户尝试访问他人资源时的授权失败情况。</div>
+          
+          <div>- 实施参数绑定验证，拒绝用户尝试指定其他用户标识符的请求。</div>
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有用户设置访问尝试添加审计日志，包括请求的UID和已认证的UID。</div>
+          
+          <div>- 实施实时告警机制，监测跨账户访问尝试（请求UID ≠ 已认证UID）。</div>
+          
+          <div>- 创建安全监控仪表板，跟踪授权失败率和可疑参数模式。</div>
+          
+          <div>- 定期使用自动化分析工具审查访问日志，查找水平权限提升模式。</div>
+          
+          <div>- 实施蜜罐令牌或诱饵用户账户，以检测枚举和未授权访问尝试。</div>
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/user/avatar?uid=1001
+          <span class="badge Medium">Medium (70)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/user/avatar?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 uid-parameter-removal 的攻击载荷，测试理由：边界绕过：移除 uid 参数以观察默认/自身行为。；具体覆写参数：未观察到参数覆写</div>
+          <div class="kv"><strong>触发载荷:</strong> uid-parameter-removal</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=200 / attack=200</div>
+          <div class="kv"><strong>内容相似度:</strong> 1.0</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=7 / baseline=7 / attack=7 / overlap=1.00
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">未匹配到手机号/邮箱/身份证等敏感模式。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;avatar_url&#34;:&#34;https://cdn.example.local/avatar/1001.png&#34;,&#34;bio&#34;:&#34;I love secure coding and coffee.&#34;,&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>{&#34;code&#34;:0,&#34;data&#34;:{&#34;avatar_url&#34;:&#34;https://cdn.example.local/avatar/1001.png&#34;,&#34;bio&#34;:&#34;I love secure coding and coffee.&#34;,&#34;nickname&#34;:&#34;zs_dev&#34;,&#34;uid&#34;:&#34;1001&#34;},&#34;msg&#34;:&#34;ok&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">攻击者可越权执行敏感操作或查看未授权页面。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：中等。漏洞利用成功，存在明显的越权行为。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 当省略 uid 参数时，端点返回了另一用户的数据，这表明服务端缺少所有权验证且存在不安全的默认行为。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+          <div>- 要求所有请求必须包含 uid 参数；若缺失则返回 400 Bad Request</div>
+          
+          <div>- 实施服务端检查：比较请求的 uid 与已认证用户的 ID；若不匹配则返回 403</div>
+          
+          <div>- 移除当 uid 参数省略时回退到已认证用户数据的默认行为</div>
+          
+          <div>- 在处理请求前添加验证用户所有权的授权中间件</div>
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有用户资源端点实施默认拒绝的授权策略</div>
+          
+          <div>- 使用 UUID 替代顺序数字 ID 以降低枚举风险</div>
+          
+          <div>- 创建具有 RBAC/ABAC 规则的集中式授权服务以管理用户数据访问</div>
+          
+          <div>- 添加安全单元测试，验证跨账户访问尝试会返回 403 响应</div>
+          
+          <div>- 实施参数验证中间件，拒绝缺少必需参数的请求</div>
+          
+          <div>- 设计 API 时使用路径参数（/api/v1/user/{uid}/avatar）而非查询参数来标识资源</div>
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+          <div>- 为所有用户数据访问尝试实施审计日志记录，包括请求的用户 ID 和已认证的用户 ID</div>
+          
+          <div>- 为来自单一源的重复 403 授权失败创建告警</div>
+          
+          <div>- 在访问日志中监控参数操纵攻击</div>
+          
+          <div>- 实施自动化安全测试，验证所有用户资源端点的授权控制</div>
+          
+          <div>- 为超出正常行为的跨账户访问模式添加异常检测</div>
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> llm_mitigation_pass</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001
+          <span class="badge Low">Low (10)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 admin-file-access 的攻击载荷，测试理由：尝试通过使用特权文件ID模式访问管理员级别文件。；具体覆写参数：query={&#39;file_id&#39;: &#39;admin-001&#39;}</div>
+          <div class="kv"><strong>触发载荷:</strong> admin-file-access</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=206 / attack=500</div>
+          <div class="kv"><strong>内容相似度:</strong> 0.0648</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=0 / baseline=0 / attack=0 / overlap=0.00
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">未匹配到手机号/邮箱/身份证等敏感模式。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>partial-content:f-1001:nonce=476632</pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>{&#34;detail&#34;:&#34;invalid literal for int() with base 10: &#39;admin-001&#39;&#34;,&#34;error&#34;:&#34;internal server error&#34;,&#34;trace&#34;:&#34;FileService.download -&gt; parse_file_id -&gt; resolver.map&#34;,&#34;type&#34;:&#34;ValueError&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">当前存在较弱越权信号，建议结合业务语义进一步复测确认。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：低。发现可疑越权信号，建议尽快修复并复测。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 基于角色的访问控制（RBAC）用于文件分类；分离管理员文件存储并采用独立的授权中间件；审计所有管理员文件访问。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> payload_hint</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/payment/cards?uid=1001
+          <span class="badge Info">Info (0)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/payment/cards?uid=1001</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 uid-increment 的攻击载荷，测试理由：水平越权：通过数字ID递增访问其他用户的支付卡。；具体覆写参数：query={&#39;uid&#39;: &#39;1002&#39;}</div>
+          <div class="kv"><strong>触发载荷:</strong> uid-increment</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=202 / attack=403</div>
+          <div class="kv"><strong>内容相似度:</strong> 0.1739</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=0 / baseline=0 / attack=0 / overlap=0.00
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">未匹配到手机号/邮箱/身份证等敏感模式。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>accepted:masked-card-view:uid=1001:nonce=233037</pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>{&#34;error&#34;:&#34;Forbidden&#34;} </pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">当前存在较弱越权信号，建议结合业务语义进一步复测确认。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：信息级。当前未发现明确越权成功证据。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 验证认证用户（来自令牌）是否与&#39;uid&#39;查询参数匹配；在返回数据前实施所有权检查。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> payload_hint</div>
+      </div>
+      
+      <div class="card">
+        <h2>
+          GET http://127.0.0.1:8000/api/v1/system/announcements?id=1
+          <span class="badge Info">Info (0)</span>
+        </h2>
+
+        <div class="section">
+          <h3>风险对象</h3>
+          <div class="kv"><strong>接口:</strong> GET http://127.0.0.1:8000/api/v1/system/announcements?id=1</div>
+        </div>
+
+        <div class="section">
+          <h3>触发条件</h3>
+          <div class="kv">使用了名为 increment-id 的攻击载荷，测试理由：通过数字ID递增实现水平越权以访问其他公告。；具体覆写参数：query={&#39;id&#39;: &#39;2&#39;}</div>
+          <div class="kv"><strong>触发载荷:</strong> increment-id</div>
+        </div>
+
+        <div class="section">
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>状态码对比:</strong> baseline=206 / attack=206</div>
+          <div class="kv"><strong>内容相似度:</strong> 0.6061</div>
+          <div class="kv"><strong>JSON 结构重合度:</strong>
+            shared=0 / baseline=0 / attack=0 / overlap=0.00
+          </div>
+          <div class="kv"><strong>敏感命中:</strong>
+            
+              <span class="muted">none</span>
+            
+          </div>
+          <div class="alert">未匹配到手机号/邮箱/身份证等敏感模式。</div>
+          <h3>风险证据（重点）</h3>
+          <div class="kv"><strong>基线响应预览:</strong></div>
+          <pre>public-announcement:1:System maintenance:noise=3969</pre>
+          <div class="kv"><strong>攻击响应预览:</strong></div>
+          <pre>public-announcement:2:Feature release:noise=4285</pre>
+        </div>
+
+        <div class="section">
+          <h3>影响分析</h3>
+          <div class="kv">当前存在较弱越权信号，建议结合业务语义进一步复测确认。</div>
+        </div>
+
+        <div class="section">
+          <h3>展示结论</h3>
+          <div class="kv"><strong>综合判定风险等级为：Info。当前未发现明确越权成功证据。</strong></div>
+        </div>
+
+        <h3>防护与缓解建议 (Mitigation &amp; Prevention)</h3>
+        <div class="kv"><strong>摘要:</strong> 实施所有权验证：通过服务器端检查确保认证用户对请求的公告ID具有明确的读取权限。</div>
+        <div class="kv"><strong>即时修复:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>工程加固:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv"><strong>监控与检测:</strong></div>
+        <div class="kv">
+          
+        </div>
+        <div class="kv muted"><strong>建议来源:</strong> payload_hint</div>
+      </div>
+      
+      
+    </div>
+  </body>
+</html>

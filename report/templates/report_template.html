@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ labels.title }}</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --high: #b91c1c;
+        --med: #b45309;
+        --low: #1d4ed8;
+        --ok: #065f46;
+        --border: #dbe3ee;
+      }
+      body {
+        margin: 0;
+        background: linear-gradient(120deg, #f4f7fb 0%, #e8eff9 100%);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      }
+      h1, h2, h3 {
+        margin-top: 0;
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 10px;
+      }
+      .metric {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .value {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: #fff;
+      }
+      .badge.High { background: var(--high); }
+      .badge.Medium { background: var(--med); }
+      .badge.Low { background: var(--low); }
+      .badge.Info { background: var(--ok); }
+      .muted {
+        color: var(--muted);
+      }
+      .section {
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px dashed var(--border);
+      }
+      .section h3 {
+        margin-bottom: 8px;
+      }
+      .kv {
+        margin: 4px 0;
+      }
+      .alert {
+        border-left: 4px solid #dc2626;
+        background: #fef2f2;
+        padding: 10px;
+        border-radius: 6px;
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        background: #fee2e2;
+        color: #991b1b;
+        margin-right: 6px;
+      }
+      pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 10px;
+        border-radius: 8px;
+        overflow-x: auto;
+      }
+      ul {
+        margin: 6px 0 0 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>LLM API Broken Access Control Report</h1>
+        <p class="muted">{{ labels.title }}</p>
+        <div class="summary">
+          <div class="metric">
+            <div class="label">{{ labels.summary_endpoints }}</div>
+            <div class="value">{{ analysis.total_endpoints_tested }}</div>
+          </div>
+          <div class="metric">
+            <div class="label">{{ labels.summary_findings }}</div>
+            <div class="value">{{ analysis.total_findings }}</div>
+          </div>
+          <div class="metric">
+            <div class="label">{{ labels.summary_overall }}</div>
+            <div class="value">{{ analysis.overall_risk }}</div>
+          </div>
+          <div class="metric">
+            <div class="label">{{ labels.summary_counts }}</div>
+            <div class="value">
+              {{ analysis.risk_counts.high }} / {{ analysis.risk_counts.medium }} / {{ analysis.risk_counts.low }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if analysis.findings %}
+      {% for finding in analysis.report_findings %}
+      <div class="card">
+        <h2>
+          {{ finding.risk_object }}
+          <span class="badge {{ finding.risk_level }}">{{ finding.risk_level }} ({{ finding.risk_score }})</span>
+        </h2>
+
+        <div class="section">
+          <h3>{{ labels.risk_object }}</h3>
+          <div class="kv"><strong>{{ labels.api }}:</strong> {{ finding.risk_object }}</div>
+        </div>
+
+        <div class="section">
+          <h3>{{ labels.trigger }}</h3>
+          <div class="kv">{{ finding.trigger_condition }}</div>
+          <div class="kv"><strong>{{ labels.trigger_payload }}:</strong> {{ finding.evidence.payload_name }}</div>
+        </div>
+
+        <div class="section">
+          <h3>{{ labels.evidence }}</h3>
+          <div class="kv"><strong>{{ labels.status_compare }}:</strong> baseline={{ finding.evidence.baseline_status }} / attack={{ finding.evidence.attack_status }}</div>
+          <div class="kv"><strong>{{ labels.similarity }}:</strong> {{ finding.evidence.similarity }}</div>
+          <div class="kv"><strong>{{ labels.schema_overlap }}:</strong>
+            shared={{ finding.schema_metrics.shared_keys }} / baseline={{ finding.schema_metrics.baseline_keys }} / attack={{ finding.schema_metrics.attack_keys }} / overlap={{ '%.2f'|format(finding.schema_metrics.overlap_ratio) }}
+          </div>
+          <div class="kv"><strong>{{ labels.sensitive_hits }}:</strong>
+            {% if finding.evidence.sensitive_hits %}
+              {% for k, v in finding.evidence.sensitive_hits.items() %}
+              <span class="pill">{{ k }}={{ v }}</span>
+              {% endfor %}
+            {% else %}
+              <span class="muted">none</span>
+            {% endif %}
+          </div>
+          <div class="alert">{{ finding.sensitive_summary }}</div>
+          <h3>{{ labels.evidence }}</h3>
+          <div class="kv"><strong>{{ labels.baseline_preview }}:</strong></div>
+          <pre>{{ finding.evidence.baseline_preview }}</pre>
+          <div class="kv"><strong>{{ labels.attack_preview }}:</strong></div>
+          <pre>{{ finding.evidence.attack_preview }}</pre>
+        </div>
+
+        <div class="section">
+          <h3>{{ labels.impact }}</h3>
+          <div class="kv">{{ finding.impact_analysis }}</div>
+        </div>
+
+        <div class="section">
+          <h3>{{ labels.conclusion }}</h3>
+          <div class="kv"><strong>{{ finding.conclusion }}</strong></div>
+        </div>
+
+        <h3>{{ labels.mitigation }}</h3>
+        <div class="kv"><strong>{{ labels.summary }}:</strong> {{ finding.mitigation.summary }}</div>
+        <div class="kv"><strong>{{ labels.immediate }}:</strong></div>
+        <div class="kv">
+          {% for item in finding.mitigation.immediate_fixes %}
+          <div>- {{ item }}</div>
+          {% endfor %}
+        </div>
+        <div class="kv"><strong>{{ labels.engineering }}:</strong></div>
+        <div class="kv">
+          {% for item in finding.mitigation.engineering_hardening %}
+          <div>- {{ item }}</div>
+          {% endfor %}
+        </div>
+        <div class="kv"><strong>{{ labels.monitoring }}:</strong></div>
+        <div class="kv">
+          {% for item in finding.mitigation.detection_and_monitoring %}
+          <div>- {{ item }}</div>
+          {% endfor %}
+        </div>
+        <div class="kv muted"><strong>{{ labels.source }}:</strong> {{ finding.mitigation.source }}</div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="card">
+        <h2>{{ labels.no_findings }}</h2>
+        <p class="muted">{{ labels.no_findings }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+[
+  {
+    "index": 1,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/payment/cards?uid=1001"
+    },
+    "response": {
+      "status_code": 202,
+      "length": 47,
+      "elapsed_ms": 3,
+      "preview": "accepted:masked-card-view:uid=1001:nonce=233037",
+      "body": "accepted:masked-card-view:uid=1001:nonce=233037"
+    },
+    "error": null
+  },
+  {
+    "index": 2,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/order/detail?order_id=50001"
+    },
+    "response": {
+      "status_code": 200,
+      "length": 100,
+      "elapsed_ms": 18,
+      "preview": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"amount\":199.0,\"order_id\":\"50001\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "index": 3,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/profile?uid=1001"
+    },
+    "response": {
+      "status_code": 200,
+      "length": 184,
+      "elapsed_ms": 2,
+      "preview": "{\"code\":0,\"data\":{\"address\":\"Shanghai Pudong District\",\"email\":\"zhangsan@example.com\",\"id_card\":\"110101199001011234\",\"name\":\"Zhang San\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"address\":\"Shanghai Pudong District\",\"email\":\"zhangsan@example.com\",\"id_card\":\"110101199001011234\",\"name\":\"Zhang San\",\"phone\":\"13800138001\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "index": 4,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/settings?uid=1001"
+    },
+    "response": {
+      "status_code": 200,
+      "length": 164,
+      "elapsed_ms": 13,
+      "preview": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937729822_894\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"nickname\":\"zs_dev\",\"notification\":{\"email\":true,\"sms\":false},\"theme\":\"light\",\"trace_1774937729822_894\":\"request-bound\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "index": 5,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/admin/audit"
+    },
+    "response": {
+      "status_code": 200,
+      "length": 140,
+      "elapsed_ms": 16,
+      "preview": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"ops_email\":\"ops_team@example.com\",\"ops_phone\":\"13600136000\",\"service\":\"payment\",\"ticket_id\":\"AUD-2026-0042\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "index": 6,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/system/announcements?id=1"
+    },
+    "response": {
+      "status_code": 206,
+      "length": 51,
+      "elapsed_ms": 16,
+      "preview": "public-announcement:1:System maintenance:noise=3969",
+      "body": "public-announcement:1:System maintenance:noise=3969"
+    },
+    "error": null
+  },
+  {
+    "index": 7,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/user/avatar?uid=1001"
+    },
+    "response": {
+      "status_code": 200,
+      "length": 162,
+      "elapsed_ms": 16,
+      "preview": "{\"code\":0,\"data\":{\"avatar_url\":\"https://cdn.example.local/avatar/1001.png\",\"bio\":\"I love secure coding and coffee.\",\"nickname\":\"zs_dev\",\"uid\":\"1001\"},\"msg\":\"ok\"} ",
+      "body": "{\"code\":0,\"data\":{\"avatar_url\":\"https://cdn.example.local/avatar/1001.png\",\"bio\":\"I love secure coding and coffee.\",\"nickname\":\"zs_dev\",\"uid\":\"1001\"},\"msg\":\"ok\"}\n"
+    },
+    "error": null
+  },
+  {
+    "index": 8,
+    "request": {
+      "method": "GET",
+      "url": "http://127.0.0.1:8000/api/v1/file/download?file_id=f-1001"
+    },
+    "response": {
+      "status_code": 206,
+      "length": 35,
+      "elapsed_ms": 2,
+      "preview": "partial-content:f-1001:nonce=476632",
+      "body": "partial-content:f-1001:nonce=476632"
+    },
+    "error": null
+  }
+]
